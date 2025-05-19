@@ -1,5 +1,5 @@
 import pingPongLogo from './assets/pingpong-logo.png'
-import './WelcomePage.css'
+import './Main.css'
 
 function WelcomePage() {
   return (
@@ -8,7 +8,7 @@ function WelcomePage() {
       <img src={pingPongLogo} className="logo pingpong" alt="PingPong logo" />
       </div>
       <h1>Willkommen bie PingPong</h1>
-      <p>Made with ❤️ by @ganatvyamalviya</p>
+      <p>Made with ❤️ by @gantavyamalviya</p>
     </>
   )
 }
