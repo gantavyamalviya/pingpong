@@ -1,6 +1,11 @@
 import './Main.css'
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@mui/material'
 
 function LoginPage() {
+
+  const navigate = useNavigate();
+
   return (
     <div>
       <form action="/login" method="POST">
@@ -8,7 +13,8 @@ function LoginPage() {
         <input type="password" name="password" placeholder="Password" required /> <br/>
         <button type="submit">Login</button>
       </form>
-      {/* <p>Not registered yet? Register Now!</p> */}
+      <p>Don't have an account?</p>
+      <Button onClick={() => navigate("/register")}>Register Now!</Button>
     </div> 
   )
 }

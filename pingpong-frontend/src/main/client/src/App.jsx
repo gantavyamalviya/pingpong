@@ -1,7 +1,7 @@
 import pingPongLogo from './assets/pingpong-logo.png'
 import './Main.css'
 
-function WelcomePage() {
+function App() {
   return (
     <>
       <div>
@@ -13,4 +13,4 @@ function WelcomePage() {
   )
 }
 
-export default WelcomePage
+export default App

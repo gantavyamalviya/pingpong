@@ -2,14 +2,14 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './index.css'
-import WelcomePage from './WelcomePage.tsx'
-import LoginPage from './LoginPage.tsx'
-import RegisterPage from './RegisterPage.tsx'
+import App from './App.jsx'
+import LoginPage from './pages/LoginPage.jsx'
+import RegisterPage from './pages/RegisterPage.jsx'
 
 const router = createBrowserRouter([
   {
     path: '/home',
-    element: <WelcomePage />,
+    element: <App />,
   },
   {
     path: '/login',
@@ -25,7 +25,7 @@ const router = createBrowserRouter([
   }
 ]);
 
-createRoot(document.getElementById('root')!).render(
+createRoot(document.getElementById('root')).render(
   <StrictMode>
     <RouterProvider router = {router} />
   </StrictMode>,
