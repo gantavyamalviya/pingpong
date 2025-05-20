@@ -1,4 +1,4 @@
-import './Main.css'
+import '../Main.css'
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material'
 

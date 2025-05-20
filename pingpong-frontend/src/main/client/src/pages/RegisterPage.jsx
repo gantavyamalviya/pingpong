@@ -1,4 +1,4 @@
-import './Main.css'
+import '../Main.css'
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material'
 
@@ -15,7 +15,7 @@ const navigate = useNavigate();
         <button type="submit">Register</button>
       </form>
       <p>Already Registered?</p>
-      <Button onClick={() => navigate("/login")}>Login</Button>
+      <Button onClick={() => navigate("/login")}>Login Now!</Button>
     </div> 
   )
 }
