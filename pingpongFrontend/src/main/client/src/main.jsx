@@ -1,11 +1,10 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { createBrowserRouter, Link, RouterProvider, useNavigate } from 'react-router-dom'
+import { createBrowserRouter, Link, RouterProvider } from 'react-router-dom'
 import './index.css'
 import App from './App.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import RegisterPage from './pages/RegisterPage.jsx'
-import { Button } from '@mui/material'
 
 
 const router = createBrowserRouter([
