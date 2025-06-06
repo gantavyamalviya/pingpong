@@ -2,6 +2,8 @@ package com.pingpong.pingpongBackend.service;
 
 import com.pingpong.pingpongBackend.dto.LoginRequest;
 import com.pingpong.pingpongBackend.dto.SignupRequest;
+import com.pingpong.pingpongBackend.exceptions.InvalidCredentialsException;
+import com.pingpong.pingpongBackend.exceptions.UserAlreadyExistsException;
 import com.pingpong.pingpongBackend.model.User;
 import com.pingpong.pingpongBackend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,7 @@ public class AuthService {
 
     public String signup(SignupRequest request) {
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            return "Email already in use!";
+            throw new UserAlreadyExistsException("Email already in use!");
         }
 
         User user = User.builder()
@@ -30,9 +32,13 @@ public class AuthService {
     }
 
     public String login(LoginRequest request) {
-        return userRepository.findByEmail(request.getEmail())
-                .filter(user -> passwordEncoder.matches(request.getPassword(), user.getPassword()))
-                .map(user -> "Login successful!")
-                .orElse("Invalid email or password!");
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password!"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new InvalidCredentialsException("Invalid email or password!");
+        }
+
+        return "Login successful!";
     }
 }

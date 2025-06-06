@@ -4,20 +4,18 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5f90a6a5-d735-4970-9362-a5936d7b133a" name="Changes" comment="Added WelcomePage">
-      <change afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/config/AppConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/config/SecurityConfig.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/controller/AuthController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/dto/LoginRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/dto/SignupRequest.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/model/User.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/repository/UserRepository.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/service/AuthService.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="5f90a6a5-d735-4970-9362-a5936d7b133a" name="Changes" comment="Added docker, mariaDB and backend code">
+      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/config/WebConfig.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/exceptions/GlobalExceptionHandler.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/exceptions/InvalidCredentialsException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/exceptions/UserAlreadyExistsException.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pingpongBackend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongBackend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pingpongBackend/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongBackend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.vscode/settings.json" beforeDir="false" afterPath="$PROJECT_DIR$/.vscode/settings.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/controller/AuthController.java" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/controller/AuthController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/service/AuthService.java" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongBackend/src/main/java/com/pingpong/pingpongBackend/service/AuthService.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pingpongFrontend/src/main/client/src/pages/LoginPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongFrontend/src/main/client/src/pages/LoginPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pingpongFrontend/src/main/client/src/pages/RegisterPage.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongFrontend/src/main/client/src/pages/RegisterPage.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pingpongFrontend/src/main/client/vite.config.ts" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongFrontend/src/main/client/vite.config.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -144,7 +142,15 @@
       <option name="project" value="LOCAL" />
       <updated>1747428326550</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Added docker, mariaDB and backend code">
+      <option name="closed" value="true" />
+      <created>1749162634457</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1749162634457</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -163,6 +169,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Added WelcomePage" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added WelcomePage" />
+    <MESSAGE value="removed redundent code" />
+    <MESSAGE value="Added docker, mariaDB and backend code" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added docker, mariaDB and backend code" />
   </component>
 </project>

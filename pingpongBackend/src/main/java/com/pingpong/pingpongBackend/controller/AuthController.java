@@ -5,6 +5,8 @@ import com.pingpong.pingpongBackend.dto.SignupRequest;
 import com.pingpong.pingpongBackend.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -15,12 +17,14 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/signup")
-    public String signup(@RequestBody SignupRequest request) {
-        return authService.signup(request);
+    public ResponseEntity<String> signup(@RequestBody SignupRequest request) {
+        String result = authService.signup(request);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/login")
-    public String login(@RequestBody LoginRequest request) {
-        return authService.login(request);
+    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
+        String result = authService.login(request);
+        return ResponseEntity.ok(result);
     }
 }
