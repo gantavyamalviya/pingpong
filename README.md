@@ -2,7 +2,7 @@
   <img src="pingpongFrontend/src/main/client/src/assets/pingpong-logo.png" width="200">
 </p>
 <p align="center">
-    <h1 align="center">PingPost</h1>
+    <h1 align="center">PingPong</h1>
 </p>
 <p align="center">
     <em>A full-stack web app to ping your friends</em>
