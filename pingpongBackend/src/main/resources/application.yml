@@ -13,6 +13,13 @@ spring:
 
 springdoc:
   api-docs:
-    path: /v3/api-docs
+    path: /v1/api-docs
   swagger-ui:
     path: /swagger-ui.html
+
+logging:
+  level:
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  file:
+    name: logs/app.log
