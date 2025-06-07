@@ -4,13 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5f90a6a5-d735-4970-9362-a5936d7b133a" name="Changes" comment="Connected backend to frontend and added exception handling">
+    <list default="true" id="5f90a6a5-d735-4970-9362-a5936d7b133a" name="Changes" comment="added hibernate debug logs, updated docker config and dependencies">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongBackend/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pingpongBackend/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongBackend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pingpongBackend/compose.yaml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/pingpongBackend/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongBackend/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pingpongBackend/src/main/resources/application.yml" beforeDir="false" afterPath="$PROJECT_DIR$/pingpongBackend/src/main/resources/application.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +67,9 @@
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/pingpongBackend" />
     </key>
@@ -179,7 +178,15 @@
       <option name="project" value="LOCAL" />
       <updated>1749202651614</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="added hibernate debug logs, updated docker config and dependencies">
+      <option name="closed" value="true" />
+      <created>1749329898785</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1749329898785</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -201,6 +208,7 @@
     <MESSAGE value="removed redundent code" />
     <MESSAGE value="Added docker, mariaDB and backend code" />
     <MESSAGE value="Connected backend to frontend and added exception handling" />
-    <option name="LAST_COMMIT_MESSAGE" value="Connected backend to frontend and added exception handling" />
+    <MESSAGE value="added hibernate debug logs, updated docker config and dependencies" />
+    <option name="LAST_COMMIT_MESSAGE" value="added hibernate debug logs, updated docker config and dependencies" />
   </component>
 </project>
