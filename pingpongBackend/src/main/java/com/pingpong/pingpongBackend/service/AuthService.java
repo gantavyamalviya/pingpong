@@ -1,44 +1,61 @@
 package com.pingpong.pingpongBackend.service;
 
-import com.pingpong.pingpongBackend.dto.LoginRequest;
-import com.pingpong.pingpongBackend.dto.SignupRequest;
-import com.pingpong.pingpongBackend.exceptions.InvalidCredentialsException;
-import com.pingpong.pingpongBackend.exceptions.UserAlreadyExistsException;
-import com.pingpong.pingpongBackend.model.User;
+import com.pingpong.pingpongBackend.dto.auth.AuthResponse;
+import com.pingpong.pingpongBackend.dto.auth.LoginRequest;
+import com.pingpong.pingpongBackend.dto.auth.RegisterRequest;
+import com.pingpong.pingpongBackend.entity.User;
 import com.pingpong.pingpongBackend.repository.UserRepository;
+import com.pingpong.pingpongBackend.security.JwtService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepository userRepository;
-    private final BCryptPasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager authenticationManager;
 
-    public String signup(SignupRequest request) {
-        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new UserAlreadyExistsException("Email already in use!");
-        }
-
-        User user = User.builder()
-                .name(request.getName())
+    public AuthResponse register(RegisterRequest request) {
+        var user = User.builder()
+                .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .fullName(request.getFullName())
                 .build();
-
         userRepository.save(user);
-        return "Signup successful!";
+        var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .refreshToken(refreshToken)
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .build();
     }
 
-    public String login(LoginRequest request) {
-        User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid email or password!"));
-
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid email or password!");
-        }
-
-        return "Login successful!";
+    public AuthResponse login(LoginRequest request) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                )
+        );
+        var user = userRepository.findByUsername(request.getUsername())
+                .orElseThrow();
+        var jwtToken = jwtService.generateToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+        return AuthResponse.builder()
+                .token(jwtToken)
+                .refreshToken(refreshToken)
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .build();
     }
 }

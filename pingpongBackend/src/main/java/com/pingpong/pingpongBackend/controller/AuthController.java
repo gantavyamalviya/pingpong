@@ -1,7 +1,8 @@
 package com.pingpong.pingpongBackend.controller;
 
-import com.pingpong.pingpongBackend.dto.LoginRequest;
-import com.pingpong.pingpongBackend.dto.SignupRequest;
+import com.pingpong.pingpongBackend.dto.auth.AuthResponse;
+import com.pingpong.pingpongBackend.dto.auth.LoginRequest;
+import com.pingpong.pingpongBackend.dto.auth.RegisterRequest;
 import com.pingpong.pingpongBackend.service.AuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -12,19 +13,18 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
 public class AuthController {
 
     private final AuthService authService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<String> signup(@RequestBody SignupRequest request) {
-        String result = authService.signup(request);
-        return ResponseEntity.ok(result);
+    @PostMapping("/register")
+    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
+        return ResponseEntity.ok(authService.register(request));
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody LoginRequest request) {
-        String result = authService.login(request);
-        return ResponseEntity.ok(result);
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
