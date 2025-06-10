@@ -15,26 +15,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   // Check for existing token and set user on mount
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
+    const initializeAuth = async () => {
       try {
-        const currentUser = authService.getCurrentUser();
-        if (currentUser) {
-          setUser(currentUser);
-          // If we're on the login/register page, redirect to dashboard
-          if (window.location.pathname === '/login' || window.location.pathname === '/register') {
-            navigate('/dashboard');
+        const token = localStorage.getItem('token');
+        if (token) {
+          const currentUser = authService.getCurrentUser();
+          if (currentUser) {
+            console.log('Setting user from token:', currentUser);
+            setUser(currentUser);
+            // If we're on the login/register page, redirect to dashboard
+            if (window.location.pathname === '/login' || window.location.pathname === '/register') {
+              navigate('/dashboard');
+            }
+          } else {
+            console.log('No valid user found in token, clearing token');
+            localStorage.removeItem('token');
           }
+        } else {
+          console.log('No token found in localStorage');
         }
       } catch (error) {
-        console.error('Error getting current user:', error);
+        console.error('Error initializing auth:', error);
         localStorage.removeItem('token');
+      } finally {
+        setIsLoading(false);
       }
-    }
+    };
+
+    initializeAuth();
   }, [navigate]);
 
   const login = async (username: string, password: string) => {
@@ -49,6 +62,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         profilePicture: response.profilePicture,
         bio: response.bio
       };
+      console.log('Setting user after login:', userData);
       setUser(userData);
       navigate('/dashboard', { replace: true });
     } catch (error) {
@@ -69,6 +83,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         profilePicture: response.profilePicture,
         bio: response.bio
       };
+      console.log('Setting user after register:', userData);
       setUser(userData);
       navigate('/dashboard', { replace: true });
     } catch (error) {
@@ -78,10 +93,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   };
 
   const logout = () => {
+    console.log('Logging out user:', user);
     authService.logout();
     setUser(null);
     navigate('/', { replace: true });
   };
+
+  if (isLoading) {
+    return null; // or a loading spinner
+  }
 
   return (
     <AuthContext.Provider value={{ user, login, register, logout }}>

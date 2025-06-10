@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { LoginRequest, RegisterRequest, AuthResponse, ApiResponse, User, Blog, Comment, PaginatedResponse } from '../types';
+import type { LoginRequest, RegisterRequest, AuthResponse, ApiResponse, User, Blog, Comment, PaginatedResponse, BlogResponse } from '../types';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -34,9 +34,11 @@ function parseJwt(token: string): any {
         .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
         .join('')
     );
-    return JSON.parse(jsonPayload);
+    const payload = JSON.parse(jsonPayload);
+    console.log('Parsed JWT payload:', payload);
+    return payload;
   } catch (e) {
-    console.error('Invalid JWT:', e);
+    console.error('Error parsing JWT:', e);
     return null;
   }
 }
@@ -73,18 +75,43 @@ export const authService = {
   },
 
   getCurrentUser: (): User | null => {
-    const token = localStorage.getItem('token');
-    if (!token) return null;
-    const payload = parseJwt(token);
-    if (!payload) return null;
-    return {
-      id: payload.id,
-      username: payload.username,
-      email: payload.email,
-      fullName: payload.fullName,
-      profilePicture: payload.profilePicture,
-      bio: payload.bio,
-    };
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.log('No token found in localStorage');
+        return null;
+      }
+      
+      const payload = parseJwt(token);
+      if (!payload) {
+        console.log('Failed to parse JWT token');
+        return null;
+      }
+
+      // Check if token is expired
+      const currentTime = Date.now() / 1000;
+      if (payload.exp && payload.exp < currentTime) {
+        console.log('Token is expired');
+        localStorage.removeItem('token');
+        return null;
+      }
+
+      // Extract user details from JWT claims
+      const user: User = {
+        id: payload.id,
+        username: payload.sub, // JWT subject is the username
+        email: payload.email,
+        fullName: payload.fullName,
+        profilePicture: payload.profilePicture,
+        bio: payload.bio,
+      };
+      
+      console.log('Retrieved current user from token:', user);
+      return user;
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
   },
 };
 
@@ -95,8 +122,8 @@ export const blogService = {
   },
 
   getBlog: async (id: number): Promise<Blog> => {
-    const response = await api.get<ApiResponse<Blog>>(`/blogs/${id}`);
-    return response.data.data;
+    const response = await api.get<BlogResponse>(`/blogs/${id}`);
+    return response.data;
   },
 
   createBlog: async (data: Partial<Blog>): Promise<Blog> => {

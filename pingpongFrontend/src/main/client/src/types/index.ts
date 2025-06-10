@@ -16,15 +16,27 @@ export interface Blog {
   author: User;
   createdAt: string;
   updatedAt: string;
+  imageUrl?: string;
+}
+
+export interface BlogResponse {
+  id: number;
+  title: string;
+  content: string;
+  author: User;
+  createdAt: string;
+  updatedAt: string;
+  imageUrl?: string;
 }
 
 // Comment related types
 export interface Comment {
   id: number;
   content: string;
-  author: User;
-  blog: Blog;
+  author?: User;
+  blog?: Blog;
   createdAt: string;
+  authorUsername?: string;
 }
 
 // Authentication related types

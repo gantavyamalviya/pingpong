@@ -7,6 +7,7 @@ import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import com.pingpong.pingpongBackend.entity.User;
 
 import java.security.Key;
 import java.util.Date;
@@ -52,9 +53,21 @@ public class JwtService {
             UserDetails userDetails,
             long expiration
     ) {
+        Map<String, Object> claims = new HashMap<>(extraClaims);
+        
+        // Add user details to claims if the user is our custom User entity
+        if (userDetails instanceof User) {
+            User user = (User) userDetails;
+            claims.put("id", user.getId());
+            claims.put("email", user.getEmail());
+            claims.put("fullName", user.getFullName());
+            claims.put("profilePicture", user.getProfilePicture());
+            claims.put("bio", user.getBio());
+        }
+
         return Jwts
                 .builder()
-                .setClaims(extraClaims)
+                .setClaims(claims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
