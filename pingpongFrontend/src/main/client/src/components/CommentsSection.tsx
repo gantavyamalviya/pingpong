@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SendIcon from '@mui/icons-material/Send';
+import EditIcon from '@mui/icons-material/Edit';
 import { commentService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import type { Comment } from '../types';
@@ -34,6 +35,9 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ blogId }) => {
   const [newComment, setNewComment] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState<number | null>(null);
+  const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
+  const [editContent, setEditContent] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
 
   const fetchComments = async () => {
     setLoading(true);
@@ -83,6 +87,30 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ blogId }) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleAddComment();
+    }
+  };
+
+  const handleEditClick = (commentId: number, content: string) => {
+    setEditingCommentId(commentId);
+    setEditContent(content);
+  };
+
+  const handleEditCancel = () => {
+    setEditingCommentId(null);
+    setEditContent('');
+  };
+
+  const handleEditSave = async (commentId: number) => {
+    setEditLoading(true);
+    try {
+      await commentService.updateComment(blogId, commentId, editContent);
+      setComments((prev) => prev.map((c) => c.id === commentId ? { ...c, content: editContent } : c));
+      setEditingCommentId(null);
+      setEditContent('');
+    } catch (err) {
+      setError('Failed to update comment.');
+    } finally {
+      setEditLoading(false);
     }
   };
 
@@ -165,6 +193,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ blogId }) => {
           {comments.map((comment, index) => {
             const canDelete = user && user.username && comment.authorUsername && 
               comment.authorUsername.toLowerCase() === user.username.toLowerCase();
+            const canEdit = canDelete;
             
             return (
               <React.Fragment key={comment.id}>
@@ -173,21 +202,36 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ blogId }) => {
                   alignItems="flex-start"
                   sx={{ px: 0 }}
                   secondaryAction={
-                    canDelete && (
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => handleDeleteComment(comment.id)}
-                        disabled={deleteLoading === comment.id}
-                        size="small"
-                        sx={{ color: 'error.main' }}
-                      >
-                        {deleteLoading === comment.id ? (
-                          <CircularProgress size={20} />
-                        ) : (
-                          <DeleteIcon />
+                    editingCommentId === comment.id ? null : (
+                      <>
+                        {canEdit && (
+                          <IconButton
+                            edge="end"
+                            aria-label="edit"
+                            onClick={() => handleEditClick(comment.id, comment.content)}
+                            size="small"
+                            sx={{ color: 'primary.main', mr: 1 }}
+                          >
+                            <EditIcon />
+                          </IconButton>
                         )}
-                      </IconButton>
+                        {canDelete && (
+                          <IconButton
+                            edge="end"
+                            aria-label="delete"
+                            onClick={() => handleDeleteComment(comment.id)}
+                            disabled={deleteLoading === comment.id}
+                            size="small"
+                            sx={{ color: 'error.main' }}
+                          >
+                            {deleteLoading === comment.id ? (
+                              <CircularProgress size={20} />
+                            ) : (
+                              <DeleteIcon />
+                            )}
+                          </IconButton>
+                        )}
+                      </>
                     )
                   }
                 >
@@ -212,14 +256,47 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ blogId }) => {
                       </Box>
                     }
                     secondary={
-                      <Typography
-                        component="span"
-                        variant="body2"
-                        color="text.primary"
-                        sx={{ display: 'block', mt: 0.5 }}
-                      >
-                        {comment.content}
-                      </Typography>
+                      editingCommentId === comment.id ? (
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                          <TextField
+                            value={editContent}
+                            onChange={e => setEditContent(e.target.value)}
+                            size="small"
+                            multiline
+                            minRows={1}
+                            maxRows={4}
+                            fullWidth
+                            disabled={editLoading}
+                          />
+                          <Button
+                            onClick={() => handleEditSave(comment.id)}
+                            color="primary"
+                            size="small"
+                            disabled={editLoading || !editContent.trim()}
+                            sx={{ minWidth: 0, px: 1 }}
+                          >
+                            {editLoading ? <CircularProgress size={18} /> : 'Save'}
+                          </Button>
+                          <Button
+                            onClick={handleEditCancel}
+                            color="inherit"
+                            size="small"
+                            disabled={editLoading}
+                            sx={{ minWidth: 0, px: 1 }}
+                          >
+                            Cancel
+                          </Button>
+                        </Box>
+                      ) : (
+                        <Typography
+                          component="span"
+                          variant="body2"
+                          color="text.primary"
+                          sx={{ display: 'block', mt: 0.5 }}
+                        >
+                          {comment.content}
+                        </Typography>
+                      )
                     }
                   />
                 </ListItem>

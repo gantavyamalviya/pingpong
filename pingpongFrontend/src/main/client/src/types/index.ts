@@ -50,6 +50,7 @@ export interface CommentResponse {
   content: string;
   authorUsername: string;
   createdAt: string;
+  blogId: number;
 }
 
 // Authentication related types

@@ -20,6 +20,9 @@ public class LikeService {
     public void likeBlog(Long blogId, User user) {
         Blog blog = blogRepository.findById(blogId)
                 .orElseThrow(() -> new ResourceNotFoundException("Blog not found"));
+        if (blog.getAuthor().getId().equals(user.getId())) {
+            throw new IllegalArgumentException("You cannot like your own post");
+        }
         if (!likeRepository.existsByUserAndBlog(user, blog)) {
             Like like = new Like();
             like.setUser(user);

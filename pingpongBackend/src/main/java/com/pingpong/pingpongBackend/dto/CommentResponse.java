@@ -9,4 +9,5 @@ public class CommentResponse {
     private String content;
     private String authorUsername;
     private LocalDateTime createdAt;
+    private Long blogId;
 } 

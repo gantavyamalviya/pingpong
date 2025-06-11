@@ -1,28 +1,33 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import {
-  Container,
-  Paper,
-  Typography,
-  Avatar,
-  Button,
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-} from '@mui/material';
+import Container from '@mui/material/Container';
+import Paper from '@mui/material/Paper';
+import Typography from '@mui/material/Typography';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
+import Grid from '@mui/material/Grid';
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardMedia from '@mui/material/CardMedia';
+import CircularProgress from '@mui/material/CircularProgress';
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemAvatar from '@mui/material/ListItemAvatar';
+import ListItemText from '@mui/material/ListItemText';
+import IconButton from '@mui/material/IconButton';
 import { useAuth } from '../context/AuthContext';
-import { userService, blogService } from '../services/api';
+import { userService, blogService, likeService } from '../services/api';
 import type { PublicUserProfileDTO, BlogResponse } from '../types';
+import FavoriteIcon from '@mui/icons-material/Favorite';
+import FavoriteBorderIcon from '@mui/icons-material/FavoriteBorder';
+import CommentIcon from '@mui/icons-material/Comment';
+import CommentsSection from '../components/CommentsSection';
+import MuiLink from '@mui/material/Link';
+import Chip from '@mui/material/Chip';
 
 const PublicProfile: React.FC = () => {
   const { username } = useParams<{ username: string }>();
@@ -39,6 +44,8 @@ const PublicProfile: React.FC = () => {
   const [listLoading, setListLoading] = useState(false);
   const [userList, setUserList] = useState<PublicUserProfileDTO[]>([]);
   const [listError, setListError] = useState<string | null>(null);
+  const [likeStates, setLikeStates] = useState<Record<number, { liked: boolean; count: number }>>({});
+  const [commentDialog, setCommentDialog] = useState<{ open: boolean; blogId: number | null }>({ open: false, blogId: null });
   const fallbackUrl = 'https://www.standardbio.com/Store/NoImageAvailable.jpeg';
 
   useEffect(() => {
@@ -65,6 +72,28 @@ const PublicProfile: React.FC = () => {
       .catch(() => setError('Failed to load profile'))
       .finally(() => setLoading(false));
   }, [username, currentUser]);
+
+  useEffect(() => {
+    if (blogs.length === 0 || !currentUser) return;
+    const fetchLikeStates = async () => {
+      const likeStatesObj: Record<number, { liked: boolean; count: number }> = {};
+      await Promise.all(
+        blogs.map(async (blog) => {
+          try {
+            const [liked, count] = await Promise.all([
+              likeService.isBlogLikedByUser(blog.id),
+              likeService.getLikeCount(blog.id),
+            ]);
+            likeStatesObj[blog.id] = { liked, count };
+          } catch {
+            likeStatesObj[blog.id] = { liked: false, count: blog.likeCount ?? 0 };
+          }
+        })
+      );
+      setLikeStates(likeStatesObj);
+    };
+    fetchLikeStates();
+  }, [blogs, currentUser]);
 
   const handleFollow = async () => {
     if (!profile) return;
@@ -110,6 +139,34 @@ const PublicProfile: React.FC = () => {
     setOpenList(null);
     setUserList([]);
     setListError(null);
+  };
+
+  const handleLike = async (blogId: number) => {
+    if (!currentUser) return;
+    const current = likeStates[blogId];
+    try {
+      if (current.liked) {
+        await likeService.unlikeBlog(blogId);
+        setLikeStates((prev) => ({
+          ...prev,
+          [blogId]: { liked: false, count: Math.max(0, prev[blogId].count - 1) },
+        }));
+      } else {
+        await likeService.likeBlog(blogId);
+        setLikeStates((prev) => ({
+          ...prev,
+          [blogId]: { liked: true, count: prev[blogId].count + 1 },
+        }));
+      }
+    } catch (err) {}
+  };
+
+  const handleOpenComments = (blogId: number) => {
+    setCommentDialog({ open: true, blogId });
+  };
+
+  const handleCloseComments = () => {
+    setCommentDialog({ open: false, blogId: null });
   };
 
   if (loading) {
@@ -175,16 +232,112 @@ const PublicProfile: React.FC = () => {
         </Box>
       </Paper>
       <Typography variant="h5" sx={{ mb: 2 }}>Blogs by {profile.fullName || profile.username}</Typography>
-      <Grid container spacing={3}>
+      <Box>
         {blogs.length === 0 ? (
           <Typography color="text.secondary" sx={{ ml: 2 }}>No blogs found.</Typography>
         ) : (
-          blogs.map((blog) => (
-            <Grid item xs={12} key={blog.id}>
-              <Card>
+          blogs
+            .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+            .map((blog) => (
+              <Paper
+                key={blog.id}
+                elevation={3}
+                sx={{
+                  borderRadius: 3,
+                  boxShadow: 3,
+                  transition: 'transform 0.15s, box-shadow 0.15s',
+                  '&:hover': { transform: 'translateY(-4px)', boxShadow: 6 },
+                  display: 'flex',
+                  flexDirection: 'row',
+                  height: 200,
+                  maxHeight: 200,
+                  minHeight: 200,
+                  p: 0,
+                  mb: 3,
+                  overflow: 'hidden',
+                }}
+              >
+                <Box sx={{ flexGrow: 1, p: 2, display: 'flex', flexDirection: 'column', minHeight: 0, width: '60%' }}>
+                  <MuiLink
+                    component={Link}
+                    to={`/blogs/${blog.id}`}
+                    variant="h6"
+                    underline="hover"
+                    sx={{
+                      fontWeight: 700,
+                      color: '#222',
+                      mb: 1,
+                      display: 'block',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                      fontSize: '1.1rem',
+                    }}
+                  >
+                    {blog.title}
+                  </MuiLink>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    paragraph
+                    sx={{
+                      mb: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                      minHeight: '3.6em',
+                      maxHeight: '3.6em',
+                      fontSize: '0.9rem',
+                    }}
+                  >
+                    {blog.content}
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
+                    {blog.hashtags && blog.hashtags.map((tag) => (
+                      <Chip
+                        key={tag}
+                        label={`#${tag}`}
+                        size="small"
+                        color="primary"
+                        component={Link}
+                        to={`/search/hashtag/${tag}`}
+                        clickable
+                        sx={{ fontWeight: 500, fontSize: '0.8rem' }}
+                      />
+                    ))}
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1, justifyContent: 'space-between' }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <IconButton
+                        size="small"
+                        color={likeStates[blog.id]?.liked ? 'error' : 'default'}
+                        onClick={() => handleLike(blog.id)}
+                        disabled={!currentUser || blog.author.username === currentUser.username}
+                        sx={{ padding: '4px' }}
+                      >
+                        {likeStates[blog.id]?.liked ? <FavoriteIcon sx={{ fontSize: '1rem' }} /> : <FavoriteBorderIcon sx={{ fontSize: '1rem' }} />}
+                      </IconButton>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>{likeStates[blog.id]?.count ?? blog.likeCount ?? 0}</Typography>
+                    </Box>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      <IconButton size="small" onClick={() => handleOpenComments(blog.id)} sx={{ padding: '4px' }}>
+                        <CommentIcon color="primary" sx={{ fontSize: '1rem' }} />
+                      </IconButton>
+                      <Typography variant="body2" sx={{ fontSize: '0.8rem' }}>{blog.commentCount ?? 0}</Typography>
+                    </Box>
+                  </Box>
+                </Box>
                 <CardMedia
                   component="img"
-                  height="200"
+                  sx={{
+                    width: '40%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    borderTopRightRadius: 12,
+                    borderBottomRightRadius: 12,
+                  }}
                   image={blog.imageUrl || fallbackUrl}
                   alt={blog.title}
                   onError={(e) => {
@@ -192,19 +345,10 @@ const PublicProfile: React.FC = () => {
                     e.currentTarget.src = fallbackUrl;
                   }}
                 />
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>{blog.title}</Typography>
-                  <Typography variant="body2" color="text.secondary" paragraph>{blog.content}</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
-                    <Typography variant="body2">{blog.likeCount ?? 0} Likes</Typography>
-                    <Typography variant="body2">{blog.commentCount ?? 0} Comments</Typography>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))
+              </Paper>
+            ))
         )}
-      </Grid>
+      </Box>
       <Dialog open={!!openList} onClose={handleCloseList} fullWidth maxWidth="xs">
         <DialogTitle>{openList === 'followers' ? 'Followers' : 'Following'}</DialogTitle>
         <DialogContent>
@@ -224,7 +368,6 @@ const PublicProfile: React.FC = () => {
                   component={Link}
                   to={`/users/${user.username}`}
                   style={{ textDecoration: 'none', color: 'inherit' }}
-                  button
                 >
                   <ListItemAvatar>
                     <Avatar src={user.profilePicture || undefined} />
@@ -238,6 +381,15 @@ const PublicProfile: React.FC = () => {
             </List>
           )}
         </DialogContent>
+      </Dialog>
+      <Dialog open={commentDialog.open} onClose={handleCloseComments} maxWidth="md" fullWidth>
+        <DialogTitle>Comments</DialogTitle>
+        <DialogContent>
+          {commentDialog.blogId && (
+            <CommentsSection blogId={commentDialog.blogId} />
+          )}
+        </DialogContent>
+        <Button onClick={handleCloseComments}>Close</Button>
       </Dialog>
     </Container>
   );

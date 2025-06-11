@@ -53,6 +53,7 @@ public class UserService {
                     resp.setContent(comment.getContent());
                     resp.setAuthorUsername(user.getUsername());
                     resp.setCreatedAt(comment.getCreatedAt());
+                    resp.setBlogId(comment.getBlog().getId());
                     return resp;
                 })
                 .collect(Collectors.toList());

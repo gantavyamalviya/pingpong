@@ -124,7 +124,7 @@ const Navbar = () => {
             variant="h6"
             noWrap
             component={RouterLink}
-            to="/"
+            to="/dashboard"
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -143,7 +143,7 @@ const Navbar = () => {
             variant="h5"
             noWrap
             component={RouterLink}
-            to="/"
+            to="/dashboard"
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },

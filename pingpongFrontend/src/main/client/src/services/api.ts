@@ -154,6 +154,11 @@ export const commentService = {
   deleteComment: async (blogId: number, commentId: number): Promise<void> => {
     await api.delete(`/blogs/${blogId}/comments/${commentId}`);
   },
+
+  updateComment: async (blogId: number, commentId: number, content: string): Promise<Comment> => {
+    const response = await api.put<Comment>(`/blogs/${blogId}/comments/${commentId}`, { content });
+    return response.data;
+  },
 };
 
 export const likeService = {
