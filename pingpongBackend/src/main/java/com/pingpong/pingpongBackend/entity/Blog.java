@@ -22,6 +22,11 @@ public class Blog {
 
     private String imageUrl;
 
+    @ElementCollection
+    @CollectionTable(name = "blog_hashtags", joinColumns = @JoinColumn(name = "blog_id"))
+    @Column(name = "hashtag")
+    private Set<String> hashtags = new HashSet<>();
+
     @ManyToOne
     @JoinColumn(name = "author_id", nullable = false)
     private User author;

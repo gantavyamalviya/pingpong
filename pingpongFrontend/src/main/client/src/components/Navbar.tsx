@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -12,6 +12,7 @@ import {
   Button,
   Tooltip,
   MenuItem,
+  Chip,
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../context/AuthContext';
@@ -21,6 +22,7 @@ import InputBase from '@mui/material/InputBase';
 import Paper from '@mui/material/Paper';
 import Popper from '@mui/material/Popper';
 import ClickAwayListener from '@mui/material/ClickAwayListener';
+import axios from 'axios';
 
 const settings = [
   { title: 'Profile', path: '/profile' },
@@ -33,10 +35,14 @@ const Navbar = () => {
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchType, setSearchType] = useState<'user' | 'hashtag'>('user');
   const [searchOpen, setSearchOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [hashtagSuggestions, setHashtagSuggestions] = useState<string[]>([]);
+  const [showHashtagSuggestions, setShowHashtagSuggestions] = useState(false);
+  const suggestionRequestRef = useRef<number | null>(null);
 
   const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorElNav(event.currentTarget);
@@ -70,15 +76,24 @@ const Navbar = () => {
     if (value.trim().length === 0) {
       setSearchResults([]);
       setSearchOpen(false);
+      setHashtagSuggestions([]);
+      setShowHashtagSuggestions(false);
       return;
     }
     setAnchorEl(e.currentTarget);
+    setShowHashtagSuggestions(true);
+    // Fetch both users and hashtags in parallel
     try {
-      const results = await userService.searchUsers(value);
-      setSearchResults(results);
+      const [userResults, hashtagResults] = await Promise.all([
+        userService.searchUsers(value),
+        value.length > 1 ? axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:8080'}/api/blogs/hashtags?q=${encodeURIComponent(value.startsWith('#') ? value.slice(1) : value)}`) : Promise.resolve({ data: [] })
+      ]);
+      setSearchResults(userResults);
+      setHashtagSuggestions((hashtagResults.data as string[]) || []);
       setSearchOpen(true);
     } catch {
       setSearchResults([]);
+      setHashtagSuggestions([]);
       setSearchOpen(false);
     }
   };
@@ -164,7 +179,7 @@ const Navbar = () => {
                 >
                   <SearchIcon sx={{ color: 'grey.600', mr: 1 }} />
                   <InputBase
-                    placeholder="Search users…"
+                    placeholder="Search Users or Hashtags..."
                     value={search}
                     onChange={handleSearchChange}
                     onKeyDown={handleSearchKeyDown}
@@ -173,7 +188,7 @@ const Navbar = () => {
                   />
                 </Paper>
                 <Popper
-                  open={searchOpen && searchResults.length > 0}
+                  open={searchOpen && (searchResults.length > 0 || hashtagSuggestions.length > 0)}
                   anchorEl={anchorEl}
                   placement="bottom-start"
                   style={{
@@ -193,28 +208,54 @@ const Navbar = () => {
                       backdropFilter: 'blur(8px)',
                     }}
                   >
-                    {searchResults.map((u) => (
-                      <MenuItem
-                        key={u.username}
-                        component={RouterLink}
-                        to={`/users/${u.username}`}
-                        style={{ textDecoration: 'none', color: 'inherit' }}
-                        onClick={() => handleSelectUser(u.username)}
-                        sx={{
-                          borderRadius: 2,
-                          my: 0.5,
-                          '&:hover': {
-                            bgcolor: 'rgba(0, 123, 255, 0.08)',
-                          },
-                        }}
-                      >
-                        <Avatar src={u.profilePicture} sx={{ width: 28, height: 28, mr: 1 }} />
-                        <Box>
-                          <Typography variant="subtitle2">{u.fullName || u.username}</Typography>
-                          <Typography variant="caption" color="text.secondary">@{u.username}</Typography>
-                        </Box>
-                      </MenuItem>
-                    ))}
+                    {searchResults.length > 0 && (
+                      <>
+                        <Typography variant="caption" sx={{ pl: 2, pt: 1, color: 'text.secondary' }}>Users</Typography>
+                        {searchResults.map((u) => (
+                          <MenuItem
+                            key={u.username}
+                            component={RouterLink}
+                            to={`/users/${u.username}`}
+                            onClick={() => handleSelectUser(u.username)}
+                            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                          >
+                            <Avatar src={u.profilePicture} alt={u.username} sx={{ width: 28, height: 28 }} />
+                            <Box>
+                              <Typography variant="subtitle2" color="text.primary">
+                                {u.fullName || u.username}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary">
+                                @{u.username}
+                              </Typography>
+                            </Box>
+                          </MenuItem>
+                        ))}
+                        <Box sx={{ borderBottom: '1px solid #eee', my: 1 }} />
+                      </>
+                    )}
+                    {hashtagSuggestions.length > 0 && (
+                      <>
+                        <Typography variant="caption" sx={{ pl: 2, pt: 1, color: 'text.secondary' }}>Hashtags</Typography>
+                        {hashtagSuggestions.map((tag) => (
+                          <MenuItem
+                            key={tag}
+                            onClick={() => {
+                              setSearch('');
+                              setShowHashtagSuggestions(false);
+                              setHashtagSuggestions([]);
+                              setSearchOpen(false);
+                              navigate(`/search/hashtag/${tag}`);
+                            }}
+                            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                          >
+                            <Chip label={`#${tag}`} size="small" color="primary" />
+                            <Typography variant="body2" color="text.secondary">
+                              Hashtag
+                            </Typography>
+                          </MenuItem>
+                        ))}
+                      </>
+                    )}
                   </Paper>
                 </Popper>
               </Box>

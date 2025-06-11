@@ -70,4 +70,14 @@ public class BlogController {
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(blogService.getBlogsPaginated(page, size));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<BlogResponse>> searchBlogsByHashtag(@RequestParam String hashtag) {
+        return ResponseEntity.ok(blogService.getBlogsByHashtag(hashtag));
+    }
+
+    @GetMapping("/hashtags")
+    public ResponseEntity<List<String>> getHashtagSuggestions(@RequestParam("q") String prefix) {
+        return ResponseEntity.ok(blogService.getHashtagSuggestions(prefix));
+    }
 } 

@@ -3,6 +3,7 @@ package com.pingpong.pingpongBackend.dto;
 import com.pingpong.pingpongBackend.entity.User;
 import lombok.Data;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 public class BlogResponse {
@@ -15,4 +16,5 @@ public class BlogResponse {
     private LocalDateTime updatedAt;
     private int likeCount;
     private int commentCount;
+    private Set<String> hashtags;
 } 

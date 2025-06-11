@@ -1,16 +1,35 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Container, Typography, Paper, CircularProgress, Box, Button } from '@mui/material';
+import { 
+  Container, 
+  Typography, 
+  Paper, 
+  CircularProgress, 
+  Box, 
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  IconButton
+} from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
 import { blogService } from '../services/api';
 import type { Blog } from '../types';
 import CommentsSection from '../components/CommentsSection';
+import { useAuth } from '../context/AuthContext';
 
 const BlogDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [blog, setBlog] = useState<Blog | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editedBlog, setEditedBlog] = useState({ title: '', content: '', imageUrl: '' });
+  const [editError, setEditError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -23,6 +42,11 @@ const BlogDetails = () => {
       try {
         const data = await blogService.getBlog(Number(id));
         setBlog(data);
+        setEditedBlog({
+          title: data.title,
+          content: data.content,
+          imageUrl: data.imageUrl || ''
+        });
       } catch (err: any) {
         console.error('Error fetching blog:', err);
         setError(err.response?.data || 'Failed to load blog');
@@ -32,6 +56,31 @@ const BlogDetails = () => {
     };
     fetchBlog();
   }, [id]);
+
+  const handleEditClick = () => {
+    setEditDialogOpen(true);
+  };
+
+  const handleEditClose = () => {
+    setEditDialogOpen(false);
+    setEditError(null);
+  };
+
+  const handleEditSubmit = async () => {
+    if (!id || !blog) return;
+
+    try {
+      setEditError(null);
+      const updatedBlog = await blogService.updateBlog(Number(id), editedBlog);
+      setBlog(updatedBlog);
+      setEditDialogOpen(false);
+    } catch (err: any) {
+      console.error('Error updating blog:', err);
+      setEditError(err.response?.data || 'Failed to update blog');
+    }
+  };
+
+  const isAuthor = user && blog && user.username === blog.author.username;
 
   if (loading) {
     return (
@@ -74,9 +123,20 @@ const BlogDetails = () => {
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 3 }}>
-        <Typography variant="h4" gutterBottom>
-          {blog.title}
-        </Typography>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+          <Typography variant="h4" gutterBottom>
+            {blog.title}
+          </Typography>
+          {isAuthor && (
+            <IconButton 
+              onClick={handleEditClick}
+              color="primary"
+              sx={{ ml: 2 }}
+            >
+              <EditIcon />
+            </IconButton>
+          )}
+        </Box>
         {blog.imageUrl && (
           <Box sx={{ mb: 3, borderRadius: 2, overflow: 'hidden' }}>
             <img
@@ -91,11 +151,58 @@ const BlogDetails = () => {
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
           <Typography variant="subtitle2" color="textSecondary">
-            By {blog.author.fullName || blog.author.username} • {new Date(blog.createdAt).toLocaleString()}
+            By {blog.author.fullName || blog.author.username} • 
+            Created: {new Date(blog.createdAt).toLocaleString()}
+            {blog.updatedAt !== blog.createdAt && 
+              ` • Updated: ${new Date(blog.updatedAt).toLocaleString()}`
+            }
           </Typography>
         </Box>
         <CommentsSection blogId={blog.id} />
       </Paper>
+
+      <Dialog open={editDialogOpen} onClose={handleEditClose} maxWidth="md" fullWidth>
+        <DialogTitle>Edit Blog</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Title"
+            fullWidth
+            value={editedBlog.title}
+            onChange={(e) => setEditedBlog({ ...editedBlog, title: e.target.value })}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            label="Content"
+            fullWidth
+            multiline
+            rows={10}
+            value={editedBlog.content}
+            onChange={(e) => setEditedBlog({ ...editedBlog, content: e.target.value })}
+            sx={{ mb: 2 }}
+          />
+          <TextField
+            margin="dense"
+            label="Image URL"
+            fullWidth
+            value={editedBlog.imageUrl}
+            onChange={(e) => setEditedBlog({ ...editedBlog, imageUrl: e.target.value })}
+          />
+          {editError && (
+            <Typography color="error" sx={{ mt: 2 }}>
+              {editError}
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditClose}>Cancel</Button>
+          <Button onClick={handleEditSubmit} variant="contained" color="primary">
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

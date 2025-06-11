@@ -49,7 +49,7 @@ public class UserController {
 
     @GetMapping("/search")
     public ResponseEntity<List<PublicUserProfileDTO>> searchUsers(@RequestParam String q) {
-        List<User> users = userRepository.findByUsernameContainingIgnoreCase(q);
+        List<User> users = userRepository.findByUsernameContainingIgnoreCaseOrFullNameContainingIgnoreCase(q, q);
         List<PublicUserProfileDTO> dtos = users.stream().map(user -> {
             PublicUserProfileDTO dto = new PublicUserProfileDTO();
             dto.setUsername(user.getUsername());

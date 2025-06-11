@@ -19,6 +19,7 @@ export interface Blog {
   imageUrl?: string;
   likeCount?: number;
   commentCount?: number;
+  hashtags?: string[];
 }
 
 export interface BlogResponse {
@@ -31,6 +32,7 @@ export interface BlogResponse {
   imageUrl?: string;
   likeCount?: number;
   commentCount?: number;
+  hashtags?: string[];
 }
 
 // Comment related types
