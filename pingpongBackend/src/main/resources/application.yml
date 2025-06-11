@@ -19,6 +19,8 @@ springdoc:
 
 logging:
   level:
+    root: DEBUG
+    com.pingpong: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
   file:

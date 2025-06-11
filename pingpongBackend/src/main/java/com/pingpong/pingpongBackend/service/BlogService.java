@@ -3,11 +3,14 @@ package com.pingpong.pingpongBackend.service;
 import com.pingpong.pingpongBackend.dto.BlogRequest;
 import com.pingpong.pingpongBackend.dto.BlogResponse;
 import com.pingpong.pingpongBackend.dto.PaginatedResponse;
+import com.pingpong.pingpongBackend.dto.AuthorDTO;
 import com.pingpong.pingpongBackend.entity.Blog;
 import com.pingpong.pingpongBackend.entity.User;
 import com.pingpong.pingpongBackend.exception.ResourceNotFoundException;
 import com.pingpong.pingpongBackend.repository.BlogRepository;
 import com.pingpong.pingpongBackend.repository.UserRepository;
+import com.pingpong.pingpongBackend.repository.LikeRepository;
+import com.pingpong.pingpongBackend.repository.CommentRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,6 +27,8 @@ import java.util.stream.Collectors;
 public class BlogService {
     private final BlogRepository blogRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
+    private final CommentRepository commentRepository;
 
     @Transactional
     public BlogResponse publishBlog(BlogRequest request, String username) {
@@ -100,9 +105,19 @@ public class BlogService {
         resp.setTitle(blog.getTitle());
         resp.setContent(blog.getContent());
         resp.setImageUrl(blog.getImageUrl());
-        resp.setAuthor(blog.getAuthor());
+        resp.setAuthor(toAuthorDTO(blog.getAuthor()));
         resp.setCreatedAt(blog.getCreatedAt());
         resp.setUpdatedAt(blog.getUpdatedAt());
+        resp.setLikeCount((int) likeRepository.countByBlog(blog));
+        resp.setCommentCount((int) commentRepository.countByBlog(blog));
         return resp;
+    }
+
+    private AuthorDTO toAuthorDTO(User user) {
+        AuthorDTO dto = new AuthorDTO();
+        dto.setUsername(user.getUsername());
+        dto.setFullName(user.getFullName());
+        dto.setProfilePicture(user.getProfilePicture());
+        return dto;
     }
 } 

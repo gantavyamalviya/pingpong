@@ -20,6 +20,7 @@ import SendIcon from '@mui/icons-material/Send';
 import { commentService } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import type { Comment } from '../types';
+import { Link } from 'react-router-dom';
 
 interface CommentsSectionProps {
   blogId: number;
@@ -194,9 +195,10 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ blogId }) => {
                     primary={
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
                         <Typography
-                          component="span"
+                          component={Link}
+                          to={`/users/${comment.authorUsername}`}
                           variant="subtitle2"
-                          sx={{ fontWeight: 600, color: '#1a1a1a' }}
+                          sx={{ fontWeight: 600, color: '#1a1a1a', textDecoration: 'none' }}
                         >
                           {comment.authorUsername || 'User'}
                         </Typography>

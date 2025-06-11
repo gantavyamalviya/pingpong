@@ -15,6 +15,12 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useAuth } from '../context/AuthContext';
+import { userService } from '../services/api';
+import SearchIcon from '@mui/icons-material/Search';
+import InputBase from '@mui/material/InputBase';
+import Paper from '@mui/material/Paper';
+import Popper from '@mui/material/Popper';
+import ClickAwayListener from '@mui/material/ClickAwayListener';
 
 const settings = [
   { title: 'Profile', path: '/profile' },
@@ -25,6 +31,10 @@ const settings = [
 const Navbar = () => {
   const [anchorElNav, setAnchorElNav] = useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
+  const [search, setSearch] = useState('');
+  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -51,6 +61,43 @@ const Navbar = () => {
     } else if (setting.path) {
       navigate(setting.path);
     }
+  };
+
+  // Live user search
+  const handleSearchChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    if (value.trim().length === 0) {
+      setSearchResults([]);
+      setSearchOpen(false);
+      return;
+    }
+    setAnchorEl(e.currentTarget);
+    try {
+      const results = await userService.searchUsers(value);
+      setSearchResults(results);
+      setSearchOpen(true);
+    } catch {
+      setSearchResults([]);
+      setSearchOpen(false);
+    }
+  };
+
+  const handleSelectUser = (username: string) => {
+    setSearch('');
+    setSearchResults([]);
+    setSearchOpen(false);
+    navigate(`/users/${username}`);
+  };
+
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
+      setSearchOpen(false);
+    }
+  };
+
+  const handleClickAway = () => {
+    setSearchOpen(false);
   };
 
   return (
@@ -95,6 +142,84 @@ const Navbar = () => {
           >
             PINGPONG
           </Typography>
+
+          {/* User Search Bar */}
+          <Box sx={{ flexGrow: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', maxWidth: 350, mx: 'auto' }}>
+            <ClickAwayListener onClickAway={handleClickAway}>
+              <Box sx={{ width: '100%', position: 'relative' }}>
+                <Paper
+                  component="form"
+                  sx={{
+                    p: '2px 8px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    width: '100%',
+                    boxShadow: 0,
+                    borderRadius: 3,
+                    bgcolor: 'rgba(255,255,255,0.25)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(255,255,255,0.18)',
+                  }}
+                  onSubmit={e => e.preventDefault()}
+                >
+                  <SearchIcon sx={{ color: 'grey.600', mr: 1 }} />
+                  <InputBase
+                    placeholder="Search users…"
+                    value={search}
+                    onChange={handleSearchChange}
+                    onKeyDown={handleSearchKeyDown}
+                    sx={{ ml: 1, flex: 1, color: '#fff', '::placeholder': { color: '#fff', opacity: 0.8 } }}
+                    inputProps={{ 'aria-label': 'search users', style: { color: '#fff' } }}
+                  />
+                </Paper>
+                <Popper
+                  open={searchOpen && searchResults.length > 0}
+                  anchorEl={anchorEl}
+                  placement="bottom-start"
+                  style={{
+                    zIndex: 1301,
+                    width: anchorEl ? anchorEl.clientWidth : undefined,
+                  }}
+                >
+                  <Paper
+                    sx={{
+                      mt: 1,
+                      width: anchorEl ? anchorEl.clientWidth : '100%',
+                      maxHeight: 300,
+                      overflowY: 'auto',
+                      borderRadius: 3,
+                      bgcolor: 'rgba(255,255,255,0.85)',
+                      boxShadow: 4,
+                      backdropFilter: 'blur(8px)',
+                    }}
+                  >
+                    {searchResults.map((u) => (
+                      <MenuItem
+                        key={u.username}
+                        component={RouterLink}
+                        to={`/users/${u.username}`}
+                        style={{ textDecoration: 'none', color: 'inherit' }}
+                        onClick={() => handleSelectUser(u.username)}
+                        sx={{
+                          borderRadius: 2,
+                          my: 0.5,
+                          '&:hover': {
+                            bgcolor: 'rgba(0, 123, 255, 0.08)',
+                          },
+                        }}
+                      >
+                        <Avatar src={u.profilePicture} sx={{ width: 28, height: 28, mr: 1 }} />
+                        <Box>
+                          <Typography variant="subtitle2">{u.fullName || u.username}</Typography>
+                          <Typography variant="caption" color="text.secondary">@{u.username}</Typography>
+                        </Box>
+                      </MenuItem>
+                    ))}
+                  </Paper>
+                </Popper>
+              </Box>
+            </ClickAwayListener>
+          </Box>
 
           {/* User menu */}
           <Box sx={{ flexGrow: 1 }} />

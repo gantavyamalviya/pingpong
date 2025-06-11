@@ -10,6 +10,7 @@ import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import Navbar from './components/Navbar';
 import BlogDetails from './pages/BlogDetails';
+import PublicProfile from './pages/PublicProfile';
 import './Main.css';
 
 // Theme configuration
@@ -91,6 +92,7 @@ const App = () => {
             </ProtectedRoute>
           } />
           <Route path="/blogs/:id" element={<BlogDetails />} />
+          <Route path="/users/:username" element={<PublicProfile />} />
 
           {/* Catch all route - redirect to dashboard if logged in, otherwise to home */}
           <Route path="*" element={<Navigate to="/" replace />} />

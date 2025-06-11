@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string, fullName: string) => Promise<void>;
   logout: () => void;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -26,21 +27,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (token) {
           const currentUser = authService.getCurrentUser();
           if (currentUser) {
-            console.log('Setting user from token:', currentUser);
             setUser(currentUser);
             // If we're on the login/register page, redirect to dashboard
             if (window.location.pathname === '/login' || window.location.pathname === '/register') {
               navigate('/dashboard');
             }
           } else {
-            console.log('No valid user found in token, clearing token');
             localStorage.removeItem('token');
           }
-        } else {
-          console.log('No token found in localStorage');
         }
       } catch (error) {
-        console.error('Error initializing auth:', error);
         localStorage.removeItem('token');
       } finally {
         setIsLoading(false);
@@ -62,11 +58,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         profilePicture: response.profilePicture,
         bio: response.bio
       };
-      console.log('Setting user after login:', userData);
       setUser(userData);
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      console.error('Login error:', error);
       throw error;
     }
   };
@@ -83,17 +77,14 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         profilePicture: response.profilePicture,
         bio: response.bio
       };
-      console.log('Setting user after register:', userData);
       setUser(userData);
       navigate('/dashboard', { replace: true });
     } catch (error) {
-      console.error('Registration error:', error);
       throw error;
     }
   };
 
   const logout = () => {
-    console.log('Logging out user:', user);
     authService.logout();
     setUser(null);
     navigate('/', { replace: true });
@@ -104,7 +95,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout }}>
+    <AuthContext.Provider value={{ user, login, register, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );

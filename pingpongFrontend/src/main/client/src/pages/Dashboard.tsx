@@ -15,7 +15,8 @@ import {
   Paper,
   Typography,
   IconButton,
-  Grid
+  Grid,
+  CardMedia
 } from '@mui/material';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -39,6 +40,7 @@ const Dashboard = () => {
   const [createError, setCreateError] = useState<string | null>(null);
   const [likeStates, setLikeStates] = useState<Record<number, { liked: boolean; count: number }>>({});
   const [commentDialog, setCommentDialog] = useState<{ open: boolean; blogId: number | null }>({ open: false, blogId: null });
+  const fallbackUrl = 'https://www.standardbio.com/Store/NoImageAvailable.jpeg';
 
   useEffect(() => {
     const fetchBlogs = async () => {
@@ -197,23 +199,30 @@ const Dashboard = () => {
                     justifyContent: 'center',
                   }}
                 >
-                  <img
-                    src={blog.imageUrl}
+                  <CardMedia
+                    component="img"
+                    height="200"
+                    image={blog.imageUrl || fallbackUrl}
                     alt={blog.title}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = fallbackUrl;
+                    }}
                   />
                 </Box>
               )}
               <Box sx={{ flex: 1 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Avatar
-                    src={blog.author.profilePicture}
-                    alt={blog.author.username}
-                    sx={{ width: 32, height: 32, mr: 1 }}
-                  />
-                  <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 500 }}>
-                    {blog.author.fullName || blog.author.username}
-                  </Typography>
+                  <Link to={`/users/${blog.author.username}`} style={{ display: 'flex', alignItems: 'center', textDecoration: 'none', color: 'inherit' }}>
+                    <Avatar
+                      src={blog.author.profilePicture}
+                      alt={blog.author.username}
+                      sx={{ width: 32, height: 32, mr: 1 }}
+                    />
+                    <Typography variant="subtitle2" color="text.secondary" sx={{ fontWeight: 500 }}>
+                      {blog.author.fullName || blog.author.username}
+                    </Typography>
+                  </Link>
                   <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
                     • {new Date(blog.createdAt).toLocaleDateString()}
                   </Typography>

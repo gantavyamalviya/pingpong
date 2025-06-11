@@ -17,6 +17,8 @@ export interface Blog {
   createdAt: string;
   updatedAt: string;
   imageUrl?: string;
+  likeCount?: number;
+  commentCount?: number;
 }
 
 export interface BlogResponse {
@@ -27,6 +29,8 @@ export interface BlogResponse {
   createdAt: string;
   updatedAt: string;
   imageUrl?: string;
+  likeCount?: number;
+  commentCount?: number;
 }
 
 // Comment related types
@@ -37,6 +41,13 @@ export interface Comment {
   blog?: Blog;
   createdAt: string;
   authorUsername?: string;
+}
+
+export interface CommentResponse {
+  id: number;
+  content: string;
+  authorUsername: string;
+  createdAt: string;
 }
 
 // Authentication related types
@@ -76,4 +87,17 @@ export interface PaginatedResponse<T> {
   totalPages: number;
   size: number;
   number: number;
+}
+
+export interface UserProfileRequest {
+  fullName: string;
+  bio: string;
+  profilePicture: string;
+}
+
+export interface PublicUserProfileDTO {
+  username: string;
+  fullName?: string;
+  bio?: string;
+  profilePicture?: string;
 } 

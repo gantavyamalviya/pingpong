@@ -10,7 +10,9 @@ public class BlogResponse {
     private String title;
     private String content;
     private String imageUrl;
-    private User author;
+    private AuthorDTO author;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private int likeCount;
+    private int commentCount;
 } 

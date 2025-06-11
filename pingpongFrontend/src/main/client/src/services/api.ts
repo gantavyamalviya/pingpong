@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { LoginRequest, RegisterRequest, AuthResponse, ApiResponse, User, Blog, Comment, PaginatedResponse, BlogResponse } from '../types';
+import type { LoginRequest, RegisterRequest, AuthResponse, ApiResponse, User, Blog, Comment, PaginatedResponse, BlogResponse, PublicUserProfileDTO, CommentResponse } from '../types';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -35,10 +35,8 @@ function parseJwt(token: string): any {
         .join('')
     );
     const payload = JSON.parse(jsonPayload);
-    console.log('Parsed JWT payload:', payload);
     return payload;
   } catch (e) {
-    console.error('Error parsing JWT:', e);
     return null;
   }
 }
@@ -78,20 +76,17 @@ export const authService = {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
-        console.log('No token found in localStorage');
         return null;
       }
       
       const payload = parseJwt(token);
       if (!payload) {
-        console.log('Failed to parse JWT token');
         return null;
       }
 
       // Check if token is expired
       const currentTime = Date.now() / 1000;
       if (payload.exp && payload.exp < currentTime) {
-        console.log('Token is expired');
         localStorage.removeItem('token');
         return null;
       }
@@ -106,7 +101,6 @@ export const authService = {
         bio: payload.bio,
       };
       
-      console.log('Retrieved current user from token:', user);
       return user;
     } catch (error) {
       console.error('Error getting current user:', error);
@@ -178,6 +172,61 @@ export const likeService = {
 
   isBlogLikedByUser: async (blogId: number): Promise<boolean> => {
     const response = await api.get<boolean>(`/blogs/${blogId}/likes/is-liked`);
+    return response.data;
+  },
+};
+
+export interface UserProfileRequest {
+  fullName: string;
+  bio: string;
+  profilePicture: string;
+}
+
+export const userService = {
+  updateProfile: async (data: UserProfileRequest): Promise<User> => {
+    const response = await api.put<User>('/users/me', data);
+    return response.data;
+  },
+  getLikedBlogs: async (): Promise<BlogResponse[]> => {
+    const response = await api.get<BlogResponse[]>('/users/me/likes');
+    return response.data;
+  },
+  getUserComments: async (): Promise<CommentResponse[]> => {
+    const response = await api.get<CommentResponse[]>('/users/me/comments');
+    return response.data;
+  },
+  searchUsers: async (query: string): Promise<User[]> => {
+    const response = await api.get<User[]>(`/users/search?q=${encodeURIComponent(query)}`);
+    return response.data;
+  },
+  followUser: async (username: string): Promise<void> => {
+    await api.post(`/users/${encodeURIComponent(username)}/follow`);
+  },
+  unfollowUser: async (username: string): Promise<void> => {
+    await api.post(`/users/${encodeURIComponent(username)}/unfollow`);
+  },
+  getFollowersCount: async (username: string): Promise<number> => {
+    const response = await api.get<number>(`/users/${encodeURIComponent(username)}/followers/count`);
+    return response.data;
+  },
+  getFollowingCount: async (username: string): Promise<number> => {
+    const response = await api.get<number>(`/users/${encodeURIComponent(username)}/following/count`);
+    return response.data;
+  },
+  getPublicProfile: async (username: string): Promise<PublicUserProfileDTO> => {
+    const response = await api.get<PublicUserProfileDTO>(`/users/public/${encodeURIComponent(username)}`);
+    return response.data;
+  },
+  isFollowing: async (username: string): Promise<boolean> => {
+    const response = await api.get<boolean>(`/users/${encodeURIComponent(username)}/is-following`);
+    return response.data;
+  },
+  getFollowers: async (username: string): Promise<PublicUserProfileDTO[]> => {
+    const response = await api.get<PublicUserProfileDTO[]>(`/users/${encodeURIComponent(username)}/followers`);
+    return response.data;
+  },
+  getFollowing: async (username: string): Promise<PublicUserProfileDTO[]> => {
+    const response = await api.get<PublicUserProfileDTO[]>(`/users/${encodeURIComponent(username)}/following`);
     return response.data;
   },
 };
