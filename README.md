@@ -67,7 +67,52 @@ PingPong is a robust social media currently in dev stage.
 
 ## ⭐ Features
 
-- Coming soon...
+### User & Authentication
+- User registration and login with JWT authentication
+- Secure password hashing and session management
+- Public and private user profiles
+- Edit profile (name, bio, profile picture)
+- Follow/unfollow users, with follower/following counts and lists
+
+### Blogging
+- Create, edit, and delete blogs (only by the author)
+- Blogs support images, hashtags, and rich content
+- Hashtags are extracted automatically and shown as clickable chips
+- Search blogs by hashtag, with hashtag suggestions as you type
+- View all blogs by a user (public profile)
+- Blogs are paginated and sorted by update date
+
+### Social Features
+- Like/unlike blogs (cannot like your own blog)
+- Comment on blogs, edit/delete your own comments
+- View all your comments and liked blogs in your profile
+- Real-time like/comment counts on blog cards
+
+### UI/UX
+- Modern, responsive UI with Material-UI and glassmorphism effects
+- Dashboard with a feed of recent blogs
+- Navbar with live search for users and hashtags (grouped results, clickable)
+- Blog cards show author info, like/comment counts, hashtags, and timestamps
+- Profile and public profile pages with consistent, modern design
+- Followers/following modals with clickable user lists
+- Fallback images for missing/broken blog images
+- All user avatars and names are clickable
+- Edit and delete options for your own comments (inline in comment section)
+- Comment dialog/modal works from any tab or blog card
+- All API calls use DTOs, never full entities (prevents lazy loading errors)
+
+### Backend & API
+- RESTful API with Spring Boot
+- MariaDB for persistent storage
+- Spring Security with JWT for authentication
+- DTO-based API responses for all user-facing endpoints
+- Logging enabled for debugging
+- Swagger/OpenAPI documentation for all endpoints
+
+### DevOps & Tooling
+- Docker support for backend and database
+- Testcontainers and JUnit for backend testing
+- ESLint and static analysis for frontend code quality
 
 ---
 
