@@ -19,8 +19,8 @@ public class Comment {
     @JoinColumn(name = "author_id", nullable = false)
     private User author;
 
-    @ManyToOne
-    @JoinColumn(name = "blog_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "blog_id", nullable = false, foreignKey = @ForeignKey(name = "FK_comment_blog", foreignKeyDefinition = "FOREIGN KEY (blog_id) REFERENCES blogs(id) ON DELETE CASCADE"))
     private Blog blog;
 
     private LocalDateTime createdAt;

@@ -15,6 +15,7 @@ import {
   IconButton
 } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { blogService } from '../services/api';
 import type { Blog } from '../types';
 import CommentsSection from '../components/CommentsSection';
@@ -28,8 +29,10 @@ const BlogDetails = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editedBlog, setEditedBlog] = useState({ title: '', content: '', imageUrl: '' });
   const [editError, setEditError] = useState<string | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
 
   useEffect(() => {
     const fetchBlog = async () => {
@@ -77,6 +80,30 @@ const BlogDetails = () => {
     } catch (err: any) {
       console.error('Error updating blog:', err);
       setEditError(err.response?.data || 'Failed to update blog');
+    }
+  };
+
+  const handleDeleteClick = () => {
+    setDeleteDialogOpen(true);
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteDialogOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!id) return;
+    
+    setDeleteLoading(true);
+    try {
+      await blogService.deleteBlog(Number(id));
+      navigate('/dashboard');
+    } catch (err: any) {
+      console.error('Error deleting blog:', err);
+      setError(err.response?.data || 'Failed to delete blog');
+    } finally {
+      setDeleteLoading(false);
+      setDeleteDialogOpen(false);
     }
   };
 
@@ -128,13 +155,22 @@ const BlogDetails = () => {
             {blog.title}
           </Typography>
           {isAuthor && (
-            <IconButton 
-              onClick={handleEditClick}
-              color="primary"
-              sx={{ ml: 2 }}
-            >
-              <EditIcon />
-            </IconButton>
+            <Box>
+              <IconButton 
+                onClick={handleEditClick}
+                color="primary"
+                sx={{ ml: 2 }}
+              >
+                <EditIcon />
+              </IconButton>
+              <IconButton 
+                onClick={handleDeleteClick}
+                color="error"
+                sx={{ ml: 1 }}
+              >
+                <DeleteIcon />
+              </IconButton>
+            </Box>
           )}
         </Box>
         {blog.imageUrl && (
@@ -200,6 +236,28 @@ const BlogDetails = () => {
           <Button onClick={handleEditClose}>Cancel</Button>
           <Button onClick={handleEditSubmit} variant="contained" color="primary">
             Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={deleteDialogOpen} onClose={handleDeleteClose}>
+        <DialogTitle>Delete Blog Post</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete this blog post? This action cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleDeleteClose} disabled={deleteLoading}>
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleDeleteConfirm} 
+            color="error" 
+            variant="contained"
+            disabled={deleteLoading}
+          >
+            {deleteLoading ? <CircularProgress size={24} /> : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
